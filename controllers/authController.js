@@ -47,7 +47,7 @@ module.exports.login_post = async (req, res) => {
             return res.status(400).json({ message: "User not found" });
         }
 
-        // Compare the provided password with the stored hash
+        // Compare the provided password with the stored hash using isMatch method
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid password" });
