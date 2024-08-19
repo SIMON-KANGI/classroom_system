@@ -1,34 +1,37 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require('bcryptjs');
-const {isEmail} = require('validator')
-const Classroom= require('./ClassRoom')
+const { isEmail } = require('validator');
+const Classroom = require('./ClassRoom');
+
 const userSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
     },
     email: {
         type: String,
         required: true,
         unique: true,
         lowercase: true,
-        validate: [isEmail, 'Please provide a valid email address']  // Validate email format
+        validate: [isEmail, 'Please provide a valid email address'],  // Validate email format
     },
     role: {
         type: String,
-
-        enum: ['Principal', 'Teacher', 'Student']  // Define allowed roles
+        enum: ['Principal', 'Teacher', 'Student'],  // roles
     },
     password: {
         type: String,
         required: true,
-        minlength: 6
+        minlength: 5,
     },
-  
-    classrooms:[{
+    classromId: {
+        type: String,
+        ref: 'ClassRoom',  // Reference to the Classroom model
+    },
+    classrooms: [{
         type: Schema.Types.ObjectId,
-        ref: 'Classroom',  // Reference to the Classroom model
+        ref: 'ClassRoom',  // Reference to the Classroom model
     }],
     date: {
         type: Date,
@@ -39,9 +42,15 @@ const userSchema = new Schema({
 // Hash the password before saving the user
 userSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
-        const salt= await bcrypt.genSalt()
+        const salt = await bcrypt.genSalt();
         this.password = await bcrypt.hash(this.password, salt);
     }
+
+    // Automatically set the role before saving
+    if (!this.role) {
+        this.setRole();
+    }
+
     next();
 });
 
@@ -62,6 +71,5 @@ userSchema.methods.setRole = function () {
         throw new Error('Invalid email for role assignment');
     }
 };
-
 
 module.exports = mongoose.model('User', userSchema);
