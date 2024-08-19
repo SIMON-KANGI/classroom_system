@@ -4,7 +4,12 @@ const Schema = mongoose.Schema;
 const timetableSchema = new Schema({
   classroom: {
     type: Schema.Types.ObjectId,
-    ref: 'Classroom',
+    ref: 'ClassRoom',
+    required: true,
+  },
+  teacher:{
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
   schedule: [{
