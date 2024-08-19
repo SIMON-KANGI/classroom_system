@@ -1,10 +1,10 @@
-const Classroom = require('../models/ClassRoom'); // Ensure the correct path to your Classroom model
+const Classroom = require('../models/ClassRoom'); 
 const User = require('../models/User');
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().populate('classrooms');
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -22,33 +22,48 @@ exports.createUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    //create a principal before validating the classroom
+    if (email === 'principal@classroom.com') {
+      // Create a principal without a classroom
+      const newUser = new User({
+        name,
+        email,
+        password,
+        role,
+      });
+
+      // Save the new principal
+      await newUser.save();
+      return res.status(201).json(newUser);
+    }
+//the classroom is needed from teacher and student roles
+    if (!classroomName) {
+      return res.status(400).json({ message: 'Classroom is required for this role' });
+    }
+
     // Find the classroom by name
     const classroom = await Classroom.findOne({ name: classroomName });
     if (!classroom) {
       return res.status(400).json({ message: 'Classroom not found' });
     }
 
-    // Create a new user and assign the role and classroom
+    // Create a new user with the classroom assignment
     const newUser = new User({
       name,
       email,
       password,
       role,
-      classroom: classroom._id, // Save the classroom's ObjectId
+      classrooms: [classroom._id], // Save the classroom's ObjectId in the array
     });
-
-    // Set role based on the email (if you have a role assignment method)
-    newUser.setRole(email);
 
     // Save the new user
     await newUser.save();
-
     res.status(201).json(newUser);
+
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
-
 // Get a user by ID
 exports.getUserById = async (req, res) => {
   try {
