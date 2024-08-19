@@ -6,15 +6,15 @@ require('dotenv').config();
 const cors= require('cors')
 
 const corsOptions = {
-  origin: 'http://localhost:5173', 
+  origin: 'https://classroomnet.netlify.app/', 
   credentials: true, 
 };
 app.use(cors(corsOptions))
 app.use(express.json());
 app.use(cookie());
 
-const dbURI='mongodb+srv://simonmwangikangi:7889Kangi@cluster0.czigckw.mongodb.net/'
-mongoose.connect(dbURI, {
+
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
  
