@@ -12,9 +12,17 @@ exports.getAllClasses = async (req, res) => {
 };
 
 exports.createClass = async (req, res) => {
-  const classroom= new Classroom(req.body);
+  const {name, schedule} = req.body
   try {
-    const newClassroom = await classroom.save();
+    const existingClassroom = await Classroom.findOne({ name });
+    if (existingClassroom) {
+      return res.status(400).json({ message: 'Classroom already exists' });
+    }
+    const newClassroom = new Classroom({
+      name,
+      schedule,
+    });
+    newClassroom.save();
     res.status(201).json(newClassroom);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -53,7 +61,7 @@ exports.deleteClass = async (req, res) => {
     if (classroom == null) {
       return res.status(404).json({ message: 'Cannot find class' });
     }
-    await classroom.remove();
+    await classroom.deleteOne();
     res.json({ message: 'Classroom deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
