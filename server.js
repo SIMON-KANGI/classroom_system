@@ -6,7 +6,7 @@ require('dotenv').config();
 const cors= require('cors')
 
 const corsOptions = {
-  origin: 'https://classroomnet.netlify.app/', 
+  origin: 'http://localhost:5173', 
   credentials: true, 
 };
 app.use(cors(corsOptions))
